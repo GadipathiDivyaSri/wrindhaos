@@ -143,6 +143,18 @@
       "attempts": 0,
       "expiresAt": 1787496413477,
       "lastSentAt": 1787496113477
+    },
+    "kalyan.student@wrindhaos.com": {
+      "code": "695385",
+      "type": "register",
+      "attempts": 0,
+      "expiresAt": 1787504983589,
+      "lastSentAt": 1787504683589,
+      "payload": {
+        "username": "student_3548",
+        "email": "kalyan.student@wrindhaos.com",
+        "password": "Password@123"
+      }
     }
   }
 }

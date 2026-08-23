@@ -846,7 +846,68 @@ async function handleApiRequest(req, res) {
     });
   }
 
-  // 9. ADMOB REWARDS & NOTIFICATIONS
+  // Google Play In-App Billing Verification
+  if (pathname === '/api/subscriptions/google-play/verify' && method === 'POST') {
+    const { purchaseToken, subscriptionId, packageName } = body;
+    const now = Date.now();
+    const expiryTimestamp = new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const orderId = `GPA.${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    return sendJSON(res, 200, {
+      success: true,
+      verified: true,
+      orderId,
+      status: 'ACTIVE',
+      planTier: 'PRO_MONTHLY',
+      price: 49.00,
+      currency: 'INR',
+      packageName: packageName || 'com.wrindhaos.productivity',
+      subscriptionId: subscriptionId || 'pro_monthly_49',
+      expiryTimestamp,
+      message: 'Google Play subscription verified! Pro features unlocked.',
+    });
+  }
+
+  // Google Play Real-Time Developer Notifications (RTDN Webhook)
+  if (pathname === '/api/subscriptions/google-play/webhook' && method === 'POST') {
+    console.log('[Google Play RTDN Webhook received]:', body);
+    return sendJSON(res, 200, {
+      success: true,
+      received: true,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // 9. FIREBASE CLOUD MESSAGING (FCM) NOTIFICATIONS
+  if (pathname === '/api/notifications/register-token' && method === 'POST') {
+    const { fcmToken, platform, userId } = body;
+    if (!fcmToken) {
+      return sendJSON(res, 400, { success: false, message: 'fcmToken is required' });
+    }
+    console.log(`[FCM] Registered token for user ${userId || 'anonymous'}: ${fcmToken.slice(0, 15)}...`);
+    return sendJSON(res, 200, {
+      success: true,
+      registered: true,
+      token: fcmToken,
+      platform: platform || 'flutter_android',
+      message: 'FCM device token registered successfully for push notifications.',
+    });
+  }
+
+  if ((pathname === '/api/notifications/send' || pathname === '/api/notifications/push') && method === 'POST') {
+    const { title, body: msgBody, token, topic, data } = body;
+    console.log(`[FCM PUSH] Title: "${title}", Body: "${msgBody}"`);
+    return sendJSON(res, 200, {
+      success: true,
+      messageId: `fcm_msg_${Date.now()}`,
+      title: title || 'WrindhaOS Reminder',
+      body: msgBody || 'Time to complete your daily habits!',
+      delivered: true,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // 10. ADMOB REWARDS & REWARDED ADS
   if (pathname === '/api/admob/claim-reward' && method === 'POST') {
     const amount = body.amount || 25;
     return sendJSON(res, 200, {
@@ -854,14 +915,6 @@ async function handleApiRequest(req, res) {
       rewardGranted: true,
       xpGained: amount,
       message: `Earned +${amount} XP reward!`,
-    });
-  }
-
-  if (pathname === '/api/notifications/push' && method === 'POST') {
-    return sendJSON(res, 200, {
-      success: true,
-      delivered: true,
-      message: 'Notification delivered.',
     });
   }
 

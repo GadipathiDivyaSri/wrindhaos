@@ -17,26 +17,37 @@ const config = {
   },
 
   google: {
-    clientId: process.env.GOOGLE_CLIENT_ID || 'mock_google_client_id',
+    clientId: process.env.GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+  },
+
+  msg91: {
+    authKey: process.env.MSG91_AUTH_KEY || '',
+    emailTemplateId: process.env.MSG91_EMAIL_TEMPLATE_ID || '',
+    otpTemplateId: process.env.MSG91_OTP_TEMPLATE_ID || '',
+    emailFrom: process.env.MSG91_EMAIL_FROM || 'no-reply@wrindhaos.com',
+    domain: process.env.MSG91_DOMAIN || 'wrindhaos.com',
+    senderId: process.env.MSG91_SENDER_ID || 'WRNDHA',
   },
 
   googlePlay: {
-    packageName: process.env.GOOGLE_PLAY_PACKAGE_NAME || 'com.wrindhaos.app',
-    serviceAccountEmail: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_EMAIL || 'wrindhaos-billing@project.iam.gserviceaccount.com',
+    packageName: process.env.GOOGLE_PLAY_PACKAGE_NAME || 'com.wrindhaos.productivity',
+    serviceAccountEmail: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_EMAIL || '',
     privateKey: (process.env.GOOGLE_PLAY_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    subscriptionProductId: process.env.GOOGLE_PLAY_SUBSCRIPTION_PRODUCT_ID || 'wrindhaos_premium_monthly',
+    subscriptionProductId: process.env.GOOGLE_PLAY_SUBSCRIPTION_PRODUCT_ID || 'pro_monthly_49',
   },
 
   otp: {
-    provider: process.env.OTP_PROVIDER || 'twilio',
-    apiKey: process.env.OTP_API_KEY || 'mock_otp_api_key',
-    templateId: process.env.OTP_TEMPLATE_ID || 'mock_otp_template',
+    provider: process.env.OTP_PROVIDER || 'msg91',
+    apiKey: process.env.MSG91_AUTH_KEY || '',
+    templateId: process.env.MSG91_EMAIL_TEMPLATE_ID || '',
   },
 
   fcm: {
-    projectId: process.env.FCM_PROJECT_ID || 'wrindhaos-firebase',
-    clientEmail: process.env.FCM_CLIENT_EMAIL || 'firebase@wrindhaos.iam.gserviceaccount.com',
+    projectId: process.env.FCM_PROJECT_ID || 'wrindhaos',
+    clientEmail: process.env.FCM_CLIENT_EMAIL || '',
     privateKey: (process.env.FCM_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    serviceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
   },
 
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
