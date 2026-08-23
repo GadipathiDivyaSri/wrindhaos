@@ -414,23 +414,22 @@ CREATE TABLE IF NOT EXISTS public.analytics_snapshots (
 
 CREATE INDEX IF NOT EXISTS idx_analytics_snapshots_date ON public.analytics_snapshots(snapshot_date DESC);
 
--- Materialized View for Admin Dashboard (NEW)
+-- Materialized View for Admin Dashboard
 CREATE MATERIALIZED VIEW IF NOT EXISTS public.admin_dashboard_stats AS
 SELECT 
-    COUNT(DISTINCT u.id) AS total_users,
-    COUNT(DISTINCT CASE WHEN u.is_premium THEN u.id END) AS premium_users,
-    COUNT(DISTINCT CASE WHEN u.created_at > CURRENT_DATE - INTERVAL '7 days' THEN u.id END) AS new_users_7d,
-    COUNT(DISTINCT CASE WHEN u.created_at > CURRENT_DATE - INTERVAL '30 days' THEN u.id END) AS new_users_30d,
-    COUNT(DISTINCT CASE WHEN u.last_login_at > CURRENT_DATE - INTERVAL '1 day' THEN u.id END) AS active_users_24h,
-    COUNT(DISTINCT t.id) AS total_tasks,
-    COUNT(DISTINCT CASE WHEN t.is_completed THEN t.id END) AS completed_tasks,
-    COUNT(DISTINCT h.id) AS total_habits,
-    COALESCE(SUM(e.amount_inr), 0) AS total_revenue,
-    COALESCE(AVG(u.focus_score), 0) AS avg_focus_score
-FROM public.user_profiles u
-LEFT JOIN public.tasks t ON t.user_id = u.user_id AND t.deleted_at IS NULL
-LEFT JOIN public.habits h ON h.user_id = u.user_id AND h.deleted_at IS NULL
-LEFT JOIN public.payment_history e ON e.user_id = u.user_id;
+    1 AS view_id,
+    (SELECT COUNT(*) FROM public.user_profiles WHERE deleted_at IS NULL) AS total_users,
+    (SELECT COUNT(*) FROM public.user_profiles WHERE is_premium = TRUE AND deleted_at IS NULL) AS premium_users,
+    (SELECT COUNT(*) FROM public.user_profiles WHERE created_at > CURRENT_DATE - INTERVAL '7 days' AND deleted_at IS NULL) AS new_users_7d,
+    (SELECT COUNT(*) FROM public.user_profiles WHERE created_at > CURRENT_DATE - INTERVAL '30 days' AND deleted_at IS NULL) AS new_users_30d,
+    (SELECT COUNT(*) FROM public.user_profiles WHERE updated_at > CURRENT_DATE - INTERVAL '1 day' AND deleted_at IS NULL) AS active_users_24h,
+    (SELECT COUNT(*) FROM public.tasks WHERE deleted_at IS NULL) AS total_tasks,
+    (SELECT COUNT(*) FROM public.tasks WHERE is_completed = TRUE AND deleted_at IS NULL) AS completed_tasks,
+    (SELECT COUNT(*) FROM public.habits WHERE deleted_at IS NULL) AS total_habits,
+    (SELECT COALESCE(SUM(amount_inr), 0) FROM public.payment_history) AS total_revenue,
+    (SELECT COALESCE(AVG(focus_score), 0) FROM public.user_profiles WHERE deleted_at IS NULL) AS avg_focus_score;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_dashboard_stats_id ON public.admin_dashboard_stats(view_id);
 
 -- =============================================================================
 -- 10. HELPER FUNCTIONS
@@ -442,7 +441,7 @@ RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.admin_users
-    WHERE (user_id = auth.uid() OR email = auth.jwt()->>'email') 
+    WHERE (user_id = auth.uid() OR email = (auth.jwt()->>'email')) 
       AND is_active = TRUE
   );
 END;
@@ -468,21 +467,28 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Audit trigger function
+-- Audit trigger function (FK-safe with admin_users lookup)
 CREATE OR REPLACE FUNCTION public.audit_trigger_function()
 RETURNS TRIGGER AS $$
+DECLARE
+    v_admin_id UUID;
 BEGIN
+    SELECT id INTO v_admin_id 
+    FROM public.admin_users 
+    WHERE user_id = auth.uid() 
+    LIMIT 1;
+
     IF TG_OP = 'DELETE' THEN
         INSERT INTO public.admin_audit_logs (admin_id, target_user_id, action, resource_type, resource_id, old_value)
-        VALUES (auth.uid(), OLD.user_id, 'DELETE', TG_TABLE_NAME, OLD.id, to_jsonb(OLD));
+        VALUES (v_admin_id, OLD.user_id, 'DELETE', TG_TABLE_NAME, OLD.id, to_jsonb(OLD));
         RETURN OLD;
     ELSIF TG_OP = 'UPDATE' THEN
         INSERT INTO public.admin_audit_logs (admin_id, target_user_id, action, resource_type, resource_id, old_value, new_value)
-        VALUES (auth.uid(), NEW.user_id, 'UPDATE', TG_TABLE_NAME, NEW.id, to_jsonb(OLD), to_jsonb(NEW));
+        VALUES (v_admin_id, NEW.user_id, 'UPDATE', TG_TABLE_NAME, NEW.id, to_jsonb(OLD), to_jsonb(NEW));
         RETURN NEW;
     ELSIF TG_OP = 'INSERT' THEN
         INSERT INTO public.admin_audit_logs (admin_id, target_user_id, action, resource_type, resource_id, new_value)
-        VALUES (auth.uid(), NEW.user_id, 'INSERT', TG_TABLE_NAME, NEW.id, to_jsonb(NEW));
+        VALUES (v_admin_id, NEW.user_id, 'INSERT', TG_TABLE_NAME, NEW.id, to_jsonb(NEW));
         RETURN NEW;
     END IF;
     RETURN NULL;
@@ -864,9 +870,11 @@ CREATE POLICY "Admins full calendar_events" ON public.calendar_events
 -- Insert default app settings
 INSERT INTO public.app_settings (key, value, description, is_public) VALUES
 ('max_free_tasks', '{"value": 50}', 'Maximum tasks for free tier users', true),
-('max_free_habits', '{"value": 10}', 'Maximum habits for free tier users', true),
-('max_free_expenses', '{"value": 100}', 'Maximum expenses for free tier users', true),
-('feature_flags', '{"ai_assistant": true, "dark_mode": true, "voice_input": false}', 'Feature flags for the app', false),
+('max_free_habits', '{"value": 2}', 'Maximum habits for free tier users', true),
+('max_free_subjects', '{"value": 2}', 'Maximum study subjects for free tier users', true),
+('max_free_goals', '{"value": 2}', 'Maximum goals for free tier users', true),
+('pro_monthly_price_inr', '{"value": 49}', 'WrindhaOS Pro Monthly Subscription Price in INR', true),
+('feature_flags', '{"ai_assistant": true, "dark_mode": true, "voice_input": false, "cloud_sync": true}', 'Feature flags for the app', false),
 ('default_budget', '{"amount": 5000, "currency": "INR"}', 'Default monthly budget', true)
 ON CONFLICT (key) DO NOTHING;
 
