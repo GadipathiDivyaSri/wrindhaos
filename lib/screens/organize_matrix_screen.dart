@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
+import '../widgets/upgrade_pro_modal.dart';
 import '../theme/app_theme.dart';
 
 class OrganizeMatrixScreen extends StatefulWidget {
@@ -17,6 +20,8 @@ class _OrganizeMatrixScreenState extends State<OrganizeMatrixScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final provider = Provider.of<AppProvider>(context);
+    final isPremium = provider.user.isPremium;
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
@@ -42,6 +47,75 @@ class _OrganizeMatrixScreenState extends State<OrganizeMatrixScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Read-Only Banner for Free Mode
+            if (!isPremium) ...[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.visibility_rounded,
+                      color: isDark ? const Color(0xFF818CF8) : const Color(0xFF0D5CE5),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Free Mode: Read-Only Access',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Viewing matrix tasks in read-only mode. Upgrade to Pro (₹49) to add or organize tasks.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        minimumSize: const Size(0, 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        showUpgradeProModal(
+                          context,
+                          featureTitle: 'Pro Priority Matrix',
+                          limitExplanation: 'Upgrade to Pro for ₹49/month to add, reorder, and schedule custom matrix priorities.',
+                        );
+                      },
+                      child: const Text('Upgrade', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const Text(
               'PRODUCTIVITY STRATEGY',
               style: TextStyle(
@@ -293,6 +367,15 @@ class _OrganizeMatrixScreenState extends State<OrganizeMatrixScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                         onSelected: (val) {
+                          final provider = Provider.of<AppProvider>(context, listen: false);
+                          if (!provider.user.isPremium) {
+                            showUpgradeProModal(
+                              context,
+                              featureTitle: 'Modify Matrix Task',
+                              limitExplanation: 'Free plan gives you read-only access. Upgrade to Pro for ₹49/month to complete, edit, or delete matrix tasks.',
+                            );
+                            return;
+                          }
                           if (val == 'edit') {
                             _showEditTaskDialog(context, tasks, idx);
                           } else if (val == 'complete') {
@@ -356,6 +439,16 @@ class _OrganizeMatrixScreenState extends State<OrganizeMatrixScreen> {
   }
 
   void _showAddTaskDialog(BuildContext context, int qNumber) {
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    if (!provider.user.isPremium) {
+      showUpgradeProModal(
+        context,
+        featureTitle: 'Add Matrix Task',
+        limitExplanation: 'Free plan includes read-only access to view matrix priorities. Upgrade to Pro for ₹49/month to add, reorder, and schedule custom matrix tasks.',
+      );
+      return;
+    }
+
     final titleCtrl = TextEditingController();
     DateTime selectedDate = DateTime.now();
     TimeOfDay selectedTime = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 2)));

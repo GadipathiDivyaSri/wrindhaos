@@ -122,22 +122,13 @@ class PersonalGrowthScreen extends StatelessWidget {
               title: 'Track your Expenses',
               icon: Icons.account_balance_wallet_outlined,
               isDark: isDark,
-              isLocked: !isPremium,
               onTap: () {
-                if (!isPremium) {
-                  showUpgradeProModal(
-                    context,
-                    featureTitle: 'Expense Tracker',
-                    limitExplanation: 'Personal Finance Tracking & Expense Ledger are exclusive to Pro members. Upgrade for ₹49/month to unlock!',
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ExpenseTrackerScreen(),
-                    ),
-                  );
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ExpenseTrackerScreen(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 14),
@@ -165,22 +156,13 @@ class PersonalGrowthScreen extends StatelessWidget {
               title: 'Organize your tasks',
               icon: Icons.format_list_bulleted_rounded,
               isDark: isDark,
-              isLocked: !isPremium,
               onTap: () {
-                if (!isPremium) {
-                  showUpgradeProModal(
-                    context,
-                    featureTitle: 'Organize Matrix',
-                    limitExplanation: 'Eisenhower Quadrant Matrix & Task Triage are exclusive to Pro members. Upgrade for ₹49/month to unlock!',
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const OrganizeMatrixScreen(),
-                    ),
-                  );
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const OrganizeMatrixScreen(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 14),
@@ -191,22 +173,13 @@ class PersonalGrowthScreen extends StatelessWidget {
               title: 'Journal',
               icon: Icons.book_outlined,
               isDark: isDark,
-              isLocked: !isPremium,
               onTap: () {
-                if (!isPremium) {
-                  showUpgradeProModal(
-                    context,
-                    featureTitle: 'Journal & Notes',
-                    limitExplanation: 'Daily Productivity Journal & Reflection Logs are exclusive to Pro members. Upgrade for ₹49/month to unlock!',
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const NotesScreen(),
-                    ),
-                  );
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotesScreen(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 30),

@@ -135,22 +135,13 @@ class StudiesScreen extends StatelessWidget {
               title: 'Focus Timer',
               subtitle: 'Deep work sessions & stopwatch',
               isDark: isDark,
-              isLocked: !isPremium,
               onTap: () {
-                if (!isPremium) {
-                  showUpgradeProModal(
-                    context,
-                    featureTitle: 'Focus Timer & Centre',
-                    limitExplanation: 'Pomodoro Focus Timer, ambient soundscapes, and deep work sessions are exclusive to Pro members. Upgrade for ₹49/month to unlock!',
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const FocusTimerScreen(),
-                    ),
-                  );
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const FocusTimerScreen(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 16),
