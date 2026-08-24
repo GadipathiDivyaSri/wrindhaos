@@ -55,12 +55,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              // Left Tab: Menu / To-Do
+              // Left Tab: To-Do
               _buildNavItem(
                 index: 0,
-                icon: Icons.menu_rounded,
-                activeIcon: Icons.menu_rounded,
-                label: 'Menu',
+                icon: Icons.checklist_rounded,
+                activeIcon: Icons.checklist_rounded,
+                label: 'To-Do',
                 isDark: isDark,
               ),
               // Center Tab: Home (Floating round button)
