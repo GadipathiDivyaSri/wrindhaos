@@ -4,12 +4,22 @@ import 'package:intl/intl.dart';
 import '../providers/app_provider.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
+import '../widgets/upgrade_pro_modal.dart';
 import 'add_expense_screen.dart';
 
 class ExpenseTrackerScreen extends StatelessWidget {
   const ExpenseTrackerScreen({super.key});
 
   void _showEditBudgetDialog(BuildContext context, AppProvider provider) {
+    if (!provider.user.isPremium) {
+      showUpgradeProModal(
+        context,
+        featureTitle: 'Edit Monthly Budget',
+        limitExplanation: 'Free plan includes read-only access to view spending. Upgrade to Pro for ₹49/month to customize monthly budgets.',
+      );
+      return;
+    }
+
     final controller = TextEditingController(
       text: provider.monthlyBudget.toStringAsFixed(0),
     );
@@ -68,6 +78,15 @@ class ExpenseTrackerScreen extends StatelessWidget {
   }
 
   void _showEditExpenseDialog(BuildContext context, AppProvider provider, ExpenseTransaction expense) {
+    if (!provider.user.isPremium) {
+      showUpgradeProModal(
+        context,
+        featureTitle: 'Edit Expense Transaction',
+        limitExplanation: 'Free plan gives you read-only access to view expenses. Upgrade to Pro for ₹49/month to edit or delete transactions.',
+      );
+      return;
+    }
+
     final titleCtrl = TextEditingController(text: expense.title);
     final amountCtrl = TextEditingController(text: expense.amount.toStringAsFixed(2));
     String category = expense.category;
@@ -237,12 +256,20 @@ class ExpenseTrackerScreen extends StatelessWidget {
         elevation: 4,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const AddExpenseScreen(),
-            ),
-          );
+          if (!provider.user.isPremium) {
+            showUpgradeProModal(
+              context,
+              featureTitle: 'Add Expense Transaction',
+              limitExplanation: 'Free plan gives you read-only access to view expenses. Upgrade to Pro for ₹49/month to record custom income and expense transactions.',
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AddExpenseScreen(),
+              ),
+            );
+          }
         },
       ),
       body: SingleChildScrollView(
@@ -250,6 +277,76 @@ class ExpenseTrackerScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Free Read-Only Mode Banner
+            if (!provider.user.isPremium) ...[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.visibility_rounded,
+                      color: isDark ? const Color(0xFF818CF8) : const Color(0xFF0D5CE5),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Free Mode: Read-Only Access',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Viewing expenses & ledger in read-only mode. Upgrade to Pro (₹49) to add or edit transactions.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isDark ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        minimumSize: const Size(0, 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        showUpgradeProModal(
+                          context,
+                          featureTitle: 'Pro Finance Ledger',
+                          limitExplanation: 'Upgrade to Pro for ₹49/month to add, edit, track, and export financial transactions.',
+                        );
+                      },
+                      child: const Text('Upgrade', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             // Available Balance & Monthly Budget Card
             Container(
               width: double.infinity,

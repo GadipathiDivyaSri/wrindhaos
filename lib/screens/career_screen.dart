@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/upgrade_pro_modal.dart';
 import 'career_roadmap_screen.dart';
 
 class CareerScreen extends StatelessWidget {
@@ -13,6 +14,7 @@ class CareerScreen extends StatelessWidget {
     final careerTasks =
         provider.tasks.where((t) => t.category == 'Career Roadmap').toList();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isPremium = provider.user.isPremium;
 
     final primaryColor = isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary;
 
@@ -28,7 +30,7 @@ class CareerScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Career Pathways & Goals',
+          'Career Roadmap & Goals',
           style: TextStyle(
             color: isDark ? Colors.white : AppTheme.lightTextPrimary,
             fontWeight: FontWeight.w800,
@@ -41,7 +43,7 @@ class CareerScreen extends StatelessWidget {
         elevation: 6,
         icon: const Icon(Icons.alt_route_rounded, color: Colors.white),
         label: const Text(
-          'Floating Roadmap',
+          'Interactive Roadmap',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: () {
@@ -58,7 +60,77 @@ class CareerScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Rank & XP Header Banner (Refer to Image 2)
+            // Read-Only Banner for Free Mode
+            if (!isPremium) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.visibility_rounded,
+                      color: isDark ? const Color(0xFF818CF8) : const Color(0xFF0D5CE5),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Free Mode: Read-Only Access',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'You can explore career milestones. Upgrade to Pro (₹49) to create, edit, or customize.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        minimumSize: const Size(0, 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        showUpgradeProModal(
+                          context,
+                          featureTitle: 'Career Roadmap Full Access',
+                          limitExplanation: 'Upgrade to Pro for ₹49/month to create, edit, and track custom career milestones and interactive nodes.',
+                        );
+                      },
+                      child: const Text('Upgrade', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Top Rank & XP Header Banner
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -92,7 +164,7 @@ class CareerScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Career Pathways',
+                          'Career Roadmap',
                           style: TextStyle(
                             color: isDark ? Colors.white : AppTheme.lightTextPrimary,
                             fontSize: 18,
@@ -101,7 +173,7 @@ class CareerScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Pathways & Goals 🎯',
+                          'Milestones & Goals 🎯',
                           style: TextStyle(
                             color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
                             fontSize: 12,
@@ -163,7 +235,7 @@ class CareerScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Drag, zoom & connect skill nodes live',
+                            'Drag, zoom & explore career milestones live',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
@@ -181,12 +253,12 @@ class CareerScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Active Milestones List
+            // Active Milestones List Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Milestone Pathways',
+                  'Career Milestones',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -206,25 +278,31 @@ class CareerScreen extends StatelessWidget {
             const SizedBox(height: 14),
 
             if (careerTasks.isEmpty) ...[
-              _buildPathwayProgressCard(
+              _buildMilestoneProgressCard(
+                context: context,
+                isPremium: isPremium,
                 title: 'Make-up graduate',
-                subtitle: 'Pathways & Goal Goals',
+                subtitle: 'Career Milestone & Goals',
                 progress: 0.60,
                 icon: Icons.school_rounded,
                 isDark: isDark,
               ),
               const SizedBox(height: 12),
-              _buildPathwayProgressCard(
+              _buildMilestoneProgressCard(
+                context: context,
+                isPremium: isPremium,
                 title: 'Complete intention',
-                subtitle: 'Draft your goals',
+                subtitle: 'Draft your career goals',
                 progress: 0.40,
                 icon: Icons.edit_note_rounded,
                 isDark: isDark,
               ),
               const SizedBox(height: 12),
-              _buildPathwayProgressCard(
+              _buildMilestoneProgressCard(
+                context: context,
+                isPremium: isPremium,
                 title: 'Develop commissions',
-                subtitle: 'Contribution',
+                subtitle: 'Skill Contribution',
                 progress: 0.25,
                 icon: Icons.lightbulb_outline_rounded,
                 isDark: isDark,
@@ -236,45 +314,65 @@ class CareerScreen extends StatelessWidget {
                 itemCount: careerTasks.length,
                 itemBuilder: (context, index) {
                   final task = careerTasks[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppTheme.darkCardBg : Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      border: isDark
-                          ? Border.all(color: AppTheme.darkCardBorder, width: 1)
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: isDark ? AppTheme.darkIconBg : AppTheme.pastelCareer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            task.isCompleted ? Icons.check_rounded : Icons.flag_rounded,
-                            color: isDark ? AppTheme.darkIconGlow : AppTheme.pastelCareerIcon,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Text(
-                            task.title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              decoration: task.isCompleted
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                              color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                  return InkWell(
+                    onTap: () {
+                      if (!isPremium) {
+                        showUpgradeProModal(
+                          context,
+                          featureTitle: 'Edit Career Milestone',
+                          limitExplanation: 'Free plan includes read-only access. Upgrade to Pro for ₹49/month to complete, edit, or modify career milestones.',
+                        );
+                      } else {
+                        provider.toggleTaskCompletion(task.id);
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(18),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppTheme.darkCardBg : Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: isDark
+                            ? Border.all(color: AppTheme.darkCardBorder, width: 1)
+                            : null,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isDark ? AppTheme.darkIconBg : AppTheme.pastelCareer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              task.isCompleted ? Icons.check_rounded : Icons.flag_rounded,
+                              color: isDark ? AppTheme.darkIconGlow : AppTheme.pastelCareerIcon,
+                              size: 20,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Text(
+                              task.title,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                decoration: task.isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                              ),
+                            ),
+                          ),
+                          if (!isPremium)
+                            Icon(
+                              Icons.lock_outline_rounded,
+                              size: 16,
+                              color: isDark ? Colors.white38 : Colors.grey,
+                            ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -286,7 +384,9 @@ class CareerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPathwayProgressCard({
+  Widget _buildMilestoneProgressCard({
+    required BuildContext context,
+    required bool isPremium,
     required String title,
     required String subtitle,
     required double progress,
@@ -295,93 +395,105 @@ class CareerScreen extends StatelessWidget {
   }) {
     final percent = (progress * 100).toInt();
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkCardBg : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: isDark ? Border.all(color: AppTheme.darkCardBorder, width: 1) : null,
-        boxShadow: isDark
-            ? AppTheme.darkCardShadow
-            : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+    return InkWell(
+      onTap: () {
+        if (!isPremium) {
+          showUpgradeProModal(
+            context,
+            featureTitle: 'Career Milestones Edit Access',
+            limitExplanation: 'Free plan gives you read-only access. Upgrade to Pro for ₹49/month to manage and customize career milestones.',
+          );
+        }
+      },
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.darkCardBg : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: isDark ? Border.all(color: AppTheme.darkCardBorder, width: 1) : null,
+          boxShadow: isDark
+              ? AppTheme.darkCardShadow
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppTheme.darkIconBg : AppTheme.pastelCareer,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isDark ? AppTheme.darkIconGlow : AppTheme.pastelCareerIcon,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '$percent%',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppTheme.darkIconGlow : AppTheme.pastelCareerIcon,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDark ? const Color(0xFF4C658A) : const Color(0xFF8D827A),
+                  size: 20,
                 ),
               ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: isDark ? AppTheme.darkIconBg : AppTheme.pastelCareer,
-                  borderRadius: BorderRadius.circular(14),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFECE5),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isDark ? AppTheme.darkPrimary : AppTheme.pastelCareer,
                 ),
-                child: Icon(
-                  icon,
-                  color: isDark ? AppTheme.darkIconGlow : AppTheme.pastelCareerIcon,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppTheme.lightTextPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                '$percent%',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? AppTheme.darkIconGlow : AppTheme.pastelCareerIcon,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: isDark ? const Color(0xFF4C658A) : const Color(0xFF8D827A),
-                size: 20,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFECE5),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                isDark ? AppTheme.darkPrimary : AppTheme.pastelCareer,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -115,31 +115,22 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
 
-                    // 2. Career (PRO ONLY)
+                    // 2. Career (Read-only for free, full for Pro)
                     _buildModuleCard(
                       context,
                       isDark: isDark,
                       icon: Icons.work_outline_rounded,
                       title: 'Career',
-                      subtitle: 'Pathways & Goals',
+                      subtitle: 'Roadmap & Goals',
                       lightCardBg: AppTheme.pastelCareer,
                       lightIconContainerColor: AppTheme.pastelCareerIcon,
-                      isLocked: !provider.user.isPremium,
                       onTap: () {
-                        if (!provider.user.isPremium) {
-                          showUpgradeProModal(
-                            context,
-                            featureTitle: 'Career Roadmap',
-                            limitExplanation: 'Career Roadmap & Goal Trajectory pipelines are exclusive to Pro members. Upgrade for ₹49/month to unlock!',
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const CareerScreen(),
-                            ),
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CareerScreen(),
+                          ),
+                        );
                       },
                     ),
 
@@ -181,7 +172,7 @@ class HomeScreen extends StatelessWidget {
                       },
                     ),
 
-                    // 5. Priority Matrix (PRO ONLY)
+                    // 5. Priority Matrix (Read-only for free, full for Pro)
                     _buildModuleCard(
                       context,
                       isDark: isDark,
@@ -190,26 +181,17 @@ class HomeScreen extends StatelessWidget {
                       subtitle: 'Priority Matrix',
                       lightCardBg: AppTheme.pastelPriority,
                       lightIconContainerColor: AppTheme.pastelPriorityIcon,
-                      isLocked: !provider.user.isPremium,
                       onTap: () {
-                        if (!provider.user.isPremium) {
-                          showUpgradeProModal(
-                            context,
-                            featureTitle: 'Priority Matrix',
-                            limitExplanation: 'Priority Matrix & Deadline Scheduling are exclusive to Pro members. Upgrade for ₹49/month to unlock!',
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const PriorityMatrixScreen(),
-                            ),
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PriorityMatrixScreen(),
+                          ),
+                        );
                       },
                     ),
 
-                    // 6. Analytics (PRO ONLY)
+                    // 6. Analytics (Read-only for free, full for Pro)
                     _buildModuleCard(
                       context,
                       isDark: isDark,
@@ -218,22 +200,13 @@ class HomeScreen extends StatelessWidget {
                       subtitle: 'Track Progress',
                       lightCardBg: AppTheme.pastelAnalytics,
                       lightIconContainerColor: AppTheme.pastelAnalyticsIcon,
-                      isLocked: !provider.user.isPremium,
                       onTap: () {
-                        if (!provider.user.isPremium) {
-                          showUpgradeProModal(
-                            context,
-                            featureTitle: 'Analytics & Insights',
-                            limitExplanation: 'Advanced Progress Analytics & Focus Heatmaps are exclusive to Pro members. Upgrade for ₹49/month to unlock!',
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AnalyticsScreen(),
-                            ),
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AnalyticsScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

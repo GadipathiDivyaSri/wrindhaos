@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
+import '../widgets/upgrade_pro_modal.dart';
 import '../theme/app_theme.dart';
 
 class CareerRoadmapScreen extends StatefulWidget {
@@ -33,6 +36,8 @@ class _CareerRoadmapScreenState extends State<CareerRoadmapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AppProvider>(context);
+    final isPremium = provider.user.isPremium;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentActiveIdx = _highestCompletedIndex;
 
@@ -48,7 +53,7 @@ class _CareerRoadmapScreenState extends State<CareerRoadmapScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Floating Career Roadmap',
+          'Interactive Career Roadmap',
           style: TextStyle(
             color: isDark ? Colors.white : AppTheme.lightTextPrimary,
             fontWeight: FontWeight.bold,
@@ -95,13 +100,91 @@ class _CareerRoadmapScreenState extends State<CareerRoadmapScreen> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: () {
-          _showAddMilestoneDialog(context);
+          if (!isPremium) {
+            showUpgradeProModal(
+              context,
+              featureTitle: 'Add Career Milestone',
+              limitExplanation: 'Free plan includes read-only access to career milestones. Upgrade to Pro for ₹49/month to add, edit, and track custom milestones.',
+            );
+          } else {
+            _showAddMilestoneDialog(context);
+          }
         },
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
         child: Column(
           children: [
+            // Read-Only Banner for Free Mode
+            if (!isPremium) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: (isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5)).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.visibility_rounded,
+                      color: isDark ? const Color(0xFF818CF8) : const Color(0xFF0D5CE5),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Free Mode: Read-Only Access',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'You can explore the interactive roadmap. Upgrade to Pro (₹49) to add or complete milestones.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark ? const Color(0xFF6366F1) : const Color(0xFF0D5CE5),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        minimumSize: const Size(0, 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        showUpgradeProModal(
+                          context,
+                          featureTitle: 'Career Roadmap Full Access',
+                          limitExplanation: 'Upgrade to Pro for ₹49/month to create, edit, and track custom career milestones.',
+                        );
+                      },
+                      child: const Text('Upgrade', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
+
             // Floating Stage Header Banner
             Container(
               width: double.infinity,
@@ -489,10 +572,20 @@ class _CareerRoadmapScreenState extends State<CareerRoadmapScreen> {
                     ),
                   ),
                   onPressed: () {
-                    setState(() {
-                      _nodes[index]['isCompleted'] = !isCompleted;
-                    });
-                    Navigator.pop(ctx);
+                    final provider = Provider.of<AppProvider>(context, listen: false);
+                    if (!provider.user.isPremium) {
+                      Navigator.pop(ctx);
+                      showUpgradeProModal(
+                        context,
+                        featureTitle: 'Complete Milestone',
+                        limitExplanation: 'Free plan gives you read-only access. Upgrade to Pro for ₹49/month to complete and modify career milestones.',
+                      );
+                    } else {
+                      setState(() {
+                        _nodes[index]['isCompleted'] = !isCompleted;
+                      });
+                      Navigator.pop(ctx);
+                    }
                   },
                   icon: Icon(
                     isCompleted
