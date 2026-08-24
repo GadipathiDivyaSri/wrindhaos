@@ -166,6 +166,9 @@ class _SignupScreenState extends State<SignupScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 8.0),
           child: Form(
             key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 // WrindhaOS Brand Icon
                 Center(
                   child: Container(
