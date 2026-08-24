@@ -2,7 +2,6 @@ const crypto = require('crypto');
 const config = require('../config/env');
 const logger = require('../utils/logger');
 const { mockStore } = require('../config/supabase');
-const msg91Service = require('./msg91Service');
 
 const RESEND_COOLDOWN_MS = 30 * 1000; // 30 seconds resend cooldown
 const OTP_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes validity
@@ -16,7 +15,7 @@ function hashOTP(contact, code) {
 }
 
 /**
- * Generate and send OTP (Email / SMS via MSG91)
+ * Generate and send OTP (Self-contained standalone / local verification)
  */
 async function generateAndSendOTP(contact, type = 'email') {
   const normalizedContact = contact.toLowerCase().trim();
@@ -49,17 +48,12 @@ async function generateAndSendOTP(contact, type = 'email') {
 
   mockStore.otps.set(normalizedContact, otpRecord);
 
-  // Dispatch via MSG91
-  if (type === 'email' || normalizedContact.includes('@')) {
-    await msg91Service.sendEmailOTP(normalizedContact, rawCode);
-  } else {
-    await msg91Service.sendSmsOTP(normalizedContact, rawCode);
-  }
+  logger.info(`[WrindhaOS Local Auth] Generated 6-digit OTP for ${normalizedContact}: ${rawCode}`);
 
-  return {
+    return {
     success: true,
     message: `6-digit verification code sent successfully to ${contact}. Valid for 5 minutes.`,
-    demoOtp: process.env.NODE_ENV !== 'production' ? rawCode : undefined,
+    demoOtp: rawCode,
     expiresInSeconds: 300,
     resendCooldownSeconds: 30,
   };

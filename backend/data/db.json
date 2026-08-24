@@ -69,6 +69,34 @@
       "isPremium": false,
       "referralCode": "WRINDHA5326",
       "createdAt": "2026-08-23T14:42:23.175Z"
+    },
+    {
+      "id": "u_1787580925634",
+      "username": "user_1787580925397",
+      "email": "user_1787580925397@gmail.com",
+      "name": "user_1787580925397",
+      "password": "NewPassword@999",
+      "contact": "user_1787580925397@gmail.com",
+      "isEmailVerified": true,
+      "focusScore": 0,
+      "activeStreak": 0,
+      "isPremium": false,
+      "referralCode": "WRINDHA4046",
+      "createdAt": "2026-08-24T14:15:25.634Z"
+    },
+    {
+      "id": "u_1787580925672",
+      "username": "g_user_1787580925397",
+      "email": "g_user_1787580925397@gmail.com",
+      "name": "Google Student",
+      "googleId": "gid_1787580925672",
+      "contact": "g_user_1787580925397@gmail.com",
+      "isEmailVerified": true,
+      "focusScore": 0,
+      "activeStreak": 0,
+      "isPremium": false,
+      "referralCode": "WRINDHA5592",
+      "createdAt": "2026-08-24T14:15:25.672Z"
     }
   ],
   "tasks": [
