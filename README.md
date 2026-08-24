@@ -38,15 +38,17 @@ productivity_app/
 
 ---
 
-## 🔒 Security Architecture Highlights
+## 🔒 Security Architecture & Entitlement Highlights
 
 1. **Owner-Only RLS (`auth.uid() = user_id`)**:
    Enforced across all 19 private user tables (`habits`, `expenses`, `journal_entries`, `goals_hierarchy`, `subjects`, `calendar_events`, etc.).
 2. **Zero Admin Read Policies**:
    Administrators (`SUPER_ADMIN`, `SUPPORT_AGENT`, `FINANCE_ADMIN`, `MODERATOR`) can **NEVER** view, search, export, or modify private user content. Admin APIs return only operational metadata (`account_status`, `subscription_plan`, `usage_counts`).
-3. **Developer/DBA AES-256 Ciphertext Encryption**:
+3. **Free Tier Read-Only Access & Pro Write Guard**:
+   Free tier users receive full read access to explore locked modules (Career Roadmap, Expense Tracker, Priority Matrix, and Analytics). Attempting any write or edit action triggers an in-app **Upgrade to Pro (₹49/month)** banner.
+4. **Developer/DBA AES-256 Ciphertext Encryption**:
    Sensitive text fields (`journal_entries.body_content`) are encrypted at rest via `encryptionService.js` and `pgcrypto`. Raw database inspection shows only unreadable ciphertext tokens (`iv:authTag:ciphertext`).
-4. **User A ➔ User B Hard Isolation**:
+5. **User A ➔ User B Hard Isolation**:
    Cross-account access attempts are blocked directly at the database engine level (0 rows returned).
 
 ---
