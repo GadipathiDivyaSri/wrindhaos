@@ -32,7 +32,7 @@ class TodoScreen extends StatelessWidget {
           },
         ),
         title: Text(
-          'To-Do List',
+          'To Do',
           style: TextStyle(
             color: isDark ? Colors.white : AppTheme.textPrimary,
             fontWeight: FontWeight.w800,
